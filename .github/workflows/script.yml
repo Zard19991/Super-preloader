@@ -1,9 +1,12 @@
-name: workflow
+name: script
 on:
   push:
     branches: [master]
     paths:
-      - '**.js'
+      - 'src/**.js'
+      - 'package.json'
+      - 'pnpm-lock.yaml'
+      - 'rollup.config.mjs'
       - '**.md'
       - '**.ts'
   pull_request:
