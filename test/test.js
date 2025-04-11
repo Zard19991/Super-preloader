@@ -80,7 +80,9 @@ async function main() {
     config.executablePath = process.env.PUPPETEER_EXEC_PATH;
   }
   const browser = await puppeteer.launch(config);
-  console.log('Launch Chrome \u2714');
+  const version = await browser.version();
+
+  console.log(`Launch Chrome ${version} \u2714`);
 
   let pages, targetPage;
   for (let itry = 1; itry <= 5; itry++) {
@@ -97,10 +99,11 @@ async function main() {
 
     // handle installation
     targetPage = pages[1];
-    await waitSeconds(3);
-    await targetPage.click('body > div > div:nth-child(1) > div:nth-child(1) > div:nth-child(3) > button:nth-child(2)');
+    await targetPage.waitForFunction(() => document.querySelector('.page-confirm') !== null, {timeout: TIMEOUT});
+    await targetPage.click('.page-confirm button:nth-child(2)');
+
     try {
-      await targetPage.waitForFunction(() => document.querySelector('.page-confirm .ellipsis+div').innerHTML.includes('Script installed'), {timeout: 500 * 1000});
+      await targetPage.waitForFunction(() => document.querySelector('.page-confirm .ellipsis+div').innerHTML.includes('Script installed'), {timeout: TIMEOUT});
     } catch (err) {
       // it may fail due to dependency
       console.log('Error', err.name, err.message);
@@ -108,7 +111,7 @@ async function main() {
       await targetPage.close();
       continue;
     }
-    await targetPage.click('body > div > div:nth-child(1) > div:nth-child(1) > div:nth-child(3) > button:nth-child(3)');
+    await targetPage.click('.page-confirm button:nth-child(3)');
     console.log(`Script installation ${itry}/5: \u2714`);
     break;
   }

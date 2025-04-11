@@ -39,11 +39,11 @@ jobs:
           path: dist/Super_preloaderPlus_one_New.user.js
           if-no-files-found: error
       - name: Test
-        uses: mujo-code/puppeteer-headful@master
+        uses: machsix/puppeteer-headful@v22.8.2
         env:
           CI: 'true'
         with:
-          args: npm test
+          args: npm run test
       - name: Build documentation
         run: pnpm run docs:publish
       - name: Deploy to Github Pages
