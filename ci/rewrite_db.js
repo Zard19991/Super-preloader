@@ -94,6 +94,7 @@ function rewriteDatabase(jsonFilePath, mandatoryUpdate, readable) {
   };
 
   const detailFilePath = path.resolve(path.dirname(jsonFilePath), `${jsonFileName}_detail.json`);
+  console.log(`Detail file path: ${detailFilePath}`);
   console.log(info);
   if (readable) {
     fs.writeFile(detailFilePath, JSON.stringify(info, null, 2), 'utf8', () => {

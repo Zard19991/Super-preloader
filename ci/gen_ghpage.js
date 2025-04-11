@@ -44,7 +44,7 @@ for (const db_path of local_db_paths) {
     console.console.warn(`Warning: Database file ${db_path} does not exist.`);
     continue;
   }
-  rewrite_db(db_path, force_update);
+  rewrite_db(db_path, force_update, true);
 
   const db_file = basename(db_path);
   const db_dir = dirname(db_path);
