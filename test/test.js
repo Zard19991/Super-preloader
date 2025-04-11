@@ -1,26 +1,46 @@
-/* eslint-disable no-await-in-loop */
-/* eslint-disable no-process-exit */
-/* eslint-disable no-process-env */
-import {promisify} from 'util';
+#!/usr/bin/env node
+/* eslint-disable jsdoc/require-jsdoc */
 // node --experimental-repl-await
 
 import extract from 'extract-zip';
 import fs from 'fs';
-import got from 'got';
 import path from 'path';
 import process from 'process';
 import {platform} from 'process';
 import puppeteer from 'puppeteer';
-import stream from 'stream';
 import {fileURLToPath} from 'url';
+import https from 'https';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const pipeline = promisify(stream.pipeline);
-
 function download(url, dest) {
-  return pipeline(got.stream(url), fs.createWriteStream(dest));
+  return new Promise((resolve, reject) => {
+    const file = fs.createWriteStream(dest);
+    const request = https.get(url, (response) => {
+      if (response.statusCode === 302 || response.statusCode === 301) {
+        // Handle redirect
+        const redirectUrl = response.headers.location;
+        if (redirectUrl) {
+          download(redirectUrl, dest).then(resolve).catch(reject);
+        } else {
+          reject(new Error(`Redirected with no location header for '${url}'`));
+        }
+        return;
+      }
+      if (response.statusCode !== 200) {
+        reject(new Error(`Failed to get '${url}' (${response.statusCode})`));
+        return;
+      }
+      response.pipe(file);
+      file.on('finish', () => {
+        file.close(resolve);
+      });
+    });
+    request.on('error', (err) => {
+      fs.unlink(dest, () => reject(err));
+    });
+  });
 }
 
 async function waitSeconds(seconds) {
@@ -44,7 +64,6 @@ async function main() {
 
   await download(violentmonkey.url, violentmonkey.file);
   console.log('Download VM \u2714');
-
   await extract(violentmonkey.file, {dir: violentmonkey.folder});
   console.log('Unzip VM \u2714');
 

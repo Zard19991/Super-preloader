@@ -6,7 +6,7 @@ import dev from 'rollup-plugin-dev';
 import ejs from 'rollup-plugin-ejs';
 import json from '@rollup/plugin-json';
 import replace from 'rollup-plugin-re';
-import resolve from '@rollup/plugin-node-resolve';
+import {nodeResolve} from '@rollup/plugin-node-resolve';
 import scss from 'rollup-plugin-scss-string';
 // import {terser} from "rollup-plugin-terser";
 
@@ -84,7 +84,7 @@ const basicConfig = {
       babelHelpers: 'runtime',
       exclude: 'node_modules/**'
     }),
-    resolve({
+    nodeResolve({
       browser: true
     }),
     commonjs({
