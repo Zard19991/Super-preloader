@@ -14,6 +14,8 @@ import https from 'https';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+const TIMEOUT = 30 * 1000;
+
 function download(url, dest) {
   return new Promise((resolve, reject) => {
     const file = fs.createWriteStream(dest);
@@ -98,9 +100,7 @@ async function main() {
     await waitSeconds(3);
     await targetPage.click('body > div > div:nth-child(1) > div:nth-child(1) > div:nth-child(3) > button:nth-child(2)');
     try {
-      await targetPage.waitFor(() => document.querySelector('.page-confirm .ellipsis+div').innerHTML.includes('Script installed'), {
-        timeout: 500 * 1000
-      });
+      await targetPage.waitForFunction(() => document.querySelector('.page-confirm .ellipsis+div').innerHTML.includes('Script installed'), {timeout: 500 * 1000});
     } catch (err) {
       // it may fail due to dependency
       console.log('Error', err.name, err.message);
@@ -120,8 +120,8 @@ async function main() {
 
   // check floatWindow
   try {
-    await targetPage.waitFor('#sp-fw-rect', {
-      timeout: 30 * 1000
+    await targetPage.waitForSelector('#sp-fw-rect', {
+      timeout: TIMEOUT
     });
     console.log('FloatWindow: \u2714');
   } catch (err) {
@@ -130,18 +130,18 @@ async function main() {
   }
 
   // check seperator
-  // await targetPage.evaluate((_) => {
-  //   window.scrollTo(0, document.body.scrollHeight + 20);
-  // });
-  // try {
-  //   await targetPage.waitFor('#sp-separator-2', {
-  //     timeout: 30 * 1000
-  //   });
-  //   console.log('Seperator: \u2714');
-  // } catch (err) {
-  //   console.log('Error', err.name, err.message);
-  //   throw new Error('Seperator: \u274c');
-  // }
+  await targetPage.evaluate((_) => {
+    window.scrollTo(0, document.body.scrollHeight + 20);
+  });
+  try {
+    await targetPage.waitForSelector('#sp-separator-2', {
+      timeout: 30 * 1000
+    });
+    console.log('Seperator: \u2714');
+  } catch (err) {
+    console.log('Error', err.name, err.message);
+    throw new Error('Seperator: \u274c');
+  }
 
   // check CSP
   // if (process.env.CI !== 'true') {
