@@ -2,8 +2,11 @@ name: workflow
 on:
   push:
     branches: [master]
+    paths:
+      - 'dist/*.json'
+      - '!**.js'
   pull_request:
-    branches: [master]
+
 
 env:
   PUPPETEER_SKIP_CHROMIUM_DOWNLOAD: "true"
@@ -32,18 +35,6 @@ jobs:
         run: |
           pnpm run check
           pnpm run build
-      - name: Artiface Archive
-        uses: actions/upload-artifact@v4
-        with:
-          name: Super_preloaderPlus_one_New.user.js
-          path: dist/Super_preloaderPlus_one_New.user.js
-          if-no-files-found: error
-      - name: Test
-        uses: machsix/puppeteer-headful@v22.8.2
-        env:
-          CI: 'true'
-        with:
-          args: npm run test
       - name: Build documentation
         run: pnpm run docs:publish
       - name: Deploy to Github Pages
